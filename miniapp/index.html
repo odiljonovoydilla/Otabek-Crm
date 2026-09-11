@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Otabek Usta — Zayavka</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+  :root{
+    --ink:#1C2321;
+    --ink-soft:#4B5450;
+    --line:#E4E1D8;
+    --paper:#FAF9F6;
+    --card:#FFFFFF;
+    --amber:#F2A63C;
+    --amber-ink:#7A4A0A;
+    --teal:#0F6E56;
+    --amber-bg:#FDF1DD;
+    --red:#C0392B;
+    --red-bg:#FBEAE8;
+    --blue:#2C5F8A;
+    --blue-bg:#E8F0F7;
+    --green-bg:#E9F3E3;
+    --radius:14px;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0;
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+    background:var(--paper);
+    color:var(--ink);
+    -webkit-tap-highlight-color:transparent;
+  }
+  .wrap{max-width:520px;margin:0 auto;padding:16px 16px 32px}
+  header.top{padding:20px 4px 16px}
+  header.top h1{font-size:20px;font-weight:700;margin:0 0 4px}
+  header.top p{font-size:14px;color:var(--ink-soft);margin:0}
+
+  .screen{display:none}
+  .screen.active{display:block}
+
+  .device-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px}
+  .device-card{
+    background:var(--card);border:1.5px solid var(--line);border-radius:var(--radius);
+    padding:16px 12px;text-align:left;cursor:pointer;font-size:14px;font-weight:600;
+    display:flex;flex-direction:column;gap:8px;transition:border-color .15s, background .15s;
+  }
+  .device-card .ic{font-size:22px}
+  .device-card.selected{border-color:var(--amber);background:var(--amber-bg)}
+
+  .section-label{font-size:12px;font-weight:700;color:var(--ink-soft);letter-spacing:.02em;margin:22px 0 10px}
+
+  .field{margin-bottom:14px}
+  .field label{display:block;font-size:13px;font-weight:600;margin-bottom:6px;color:var(--ink)}
+  .field textarea, .field input, .field select{
+    width:100%;border:1.5px solid var(--line);border-radius:10px;padding:11px 12px;
+    font-size:15px;font-family:inherit;background:var(--card);color:var(--ink);
+  }
+  .field textarea{min-height:84px;resize:vertical}
+  .radio-row{display:flex;gap:8px;flex-wrap:wrap}
+  .radio-pill{
+    border:1.5px solid var(--line);border-radius:999px;padding:8px 14px;font-size:13px;
+    font-weight:600;cursor:pointer;color:var(--ink-soft);background:var(--card);
+  }
+  .radio-pill.selected{border-color:var(--teal);color:var(--teal);background:#EAF5F1}
+
+  .btn-primary{
+    width:100%;background:var(--ink);color:#fff;border:none;border-radius:12px;
+    padding:15px;font-size:16px;font-weight:700;cursor:pointer;margin-top:8px;
+  }
+  .btn-primary:disabled{background:#B9B6AC;cursor:not-allowed}
+  .btn-secondary{
+    width:100%;background:transparent;color:var(--ink-soft);border:1.5px solid var(--line);
+    border-radius:12px;padding:13px;font-size:14px;font-weight:600;cursor:pointer;margin-top:10px;
+  }
+
+  .hint{font-size:12px;color:var(--ink-soft);margin-top:4px}
+  .error{font-size:13px;color:var(--red);margin-top:6px;display:none}
+
+  .success-box{text-align:center;padding:40px 12px}
+  .success-box .check{
+    width:56px;height:56px;border-radius:50%;background:var(--green-bg);
+    display:flex;align-items:center;justify-content:center;margin:0 auto 16px;font-size:28px;
+  }
+  .success-box h2{font-size:18px;margin:0 0 8px}
+  .success-box p{font-size:14px;color:var(--ink-soft);margin:0 0 24px}
+
+  .order-card{
+    background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+    padding:14px;margin-bottom:10px;
+  }
+  .order-card .row1{display:flex;justify-content:space-between;align-items:flex-start;gap:8px}
+  .order-card .otype{font-size:15px;font-weight:700}
+  .order-card .odate{font-size:12px;color:var(--ink-soft);margin-top:2px}
+  .badge{font-size:11px;font-weight:700;padding:4px 9px;border-radius:999px;white-space:nowrap}
+  .badge.st-yangi{background:var(--blue-bg);color:var(--blue)}
+  .badge.st-tasdiqlangan{background:var(--blue-bg);color:var(--blue)}
+  .badge.st-jarayonda{background:var(--amber-bg);color:var(--amber-ink)}
+  .badge.st-bajarilgan{background:var(--green-bg);color:var(--teal)}
+  .badge.st-bekor_qilingan{background:var(--red-bg);color:var(--red)}
+  .price{font-size:13px;color:var(--ink-soft);margin-top:8px}
+
+  .empty{text-align:center;padding:60px 16px;color:var(--ink-soft)}
+  .empty .ic{font-size:36px;margin-bottom:12px}
+
+  .loading{text-align:center;padding:60px 0;color:var(--ink-soft);font-size:14px}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <!-- EKRAN 1: XIZMAT TANLASH VA FORMA -->
+  <section id="screen-order" class="screen active">
+    <header class="top">
+      <h1>Zayavka qoldirish</h1>
+      <p>Qurilma turini tanlang va muammoni qisqacha yozing</p>
+    </header>
+
+    <div class="device-grid" id="deviceGrid"></div>
+
+    <div class="section-label">Xizmat turi</div>
+    <div class="radio-row" id="orderTypeRow">
+      <div class="radio-pill" data-value="tamirlash">Ta'mirlash</div>
+      <div class="radio-pill" data-value="ornatish">O'rnatish</div>
+      <div class="radio-pill" data-value="profilaktika">Profilaktika</div>
+    </div>
+
+    <div class="field" style="margin-top:20px">
+      <label>Muammo tavsifi</label>
+      <textarea id="problemInput" placeholder="Masalan: konditsioner sovutmayapti, g'ildirak tovush chiqaryapti..."></textarea>
+    </div>
+
+    <div class="field">
+      <label>Manzil</label>
+      <input id="addressInput" type="text" placeholder="Tuman, ko'cha, uy raqami">
+    </div>
+
+    <div class="error" id="formError"></div>
+    <button class="btn-primary" id="submitBtn">Zayavka yuborish</button>
+  </section>
+
+  <!-- EKRAN 2: TASDIQLASH -->
+  <section id="screen-success" class="screen">
+    <div class="success-box">
+      <div class="check">✓</div>
+      <h2>Zayavka qabul qilindi</h2>
+      <p>Tez orada usta siz bilan bog'lanadi</p>
+      <button class="btn-primary" id="toOrdersBtn">Buyurtmalarimni ko'rish</button>
+    </div>
+  </section>
+
+  <!-- EKRAN 3: BUYURTMALARIM -->
+  <section id="screen-orders" class="screen">
+    <header class="top">
+      <h1>Buyurtmalarim</h1>
+      <p>Zayavkalaringiz holati</p>
+    </header>
+    <div id="ordersList"><div class="loading">Yuklanmoqda...</div></div>
+    <button class="btn-secondary" id="toOrderBtn">Yangi zayavka qoldirish</button>
+  </section>
+
+</div>
+
+<script>
+// ============================================================
+// SOZLAMA: API manzilini shu yerga qo'yasiz (Railway'dagi API URL)
+// ============================================================
+const API_BASE_URL = "https://example.com"; // <-- keyinroq haqiqiy API URL bilan almashtiriladi
+
+const tg = window.Telegram?.WebApp;
+tg?.ready();
+tg?.expand();
+
+const STATUS_LABELS = {
+  yangi: "Yangi",
+  tasdiqlangan: "Tasdiqlangan",
+  jarayonda: "Jarayonda",
+  ehtiyot_qism_kutilmoqda: "Ehtiyot qism kutilmoqda",
+  bajarilgan: "Bajarilgan",
+  bekor_qilingan: "Bekor qilingan",
+};
+
+const DEVICES = [
+  { value: "konditsioner", icon: "❄️", label: "Konditsioner" },
+  { value: "kirmoshina", icon: "🌀", label: "Kirmoshina" },
+  { value: "plita", icon: "🔥", label: "Plita" },
+  { value: "muzlatgich", icon: "🧊", label: "Muzlatgich" },
+];
+
+let state = { device: null, orderType: null };
+
+function showScreen(id) {
+  document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
+  document.getElementById(id).classList.add("active");
+}
+
+function renderDeviceGrid() {
+  const grid = document.getElementById("deviceGrid");
+  grid.innerHTML = DEVICES.map(d => `
+    <div class="device-card" data-value="${d.value}">
+      <span class="ic">${d.icon}</span>
+      <span>${d.label}</span>
+    </div>
+  `).join("");
+  grid.querySelectorAll(".device-card").forEach(card => {
+    card.addEventListener("click", () => {
+      grid.querySelectorAll(".device-card").forEach(c => c.classList.remove("selected"));
+      card.classList.add("selected");
+      state.device = card.dataset.value;
+    });
+  });
+}
+
+function renderOrderTypeRow() {
+  const row = document.getElementById("orderTypeRow");
+  row.querySelectorAll(".radio-pill").forEach(pill => {
+    pill.addEventListener("click", () => {
+      row.querySelectorAll(".radio-pill").forEach(p => p.classList.remove("selected"));
+      pill.classList.add("selected");
+      state.orderType = pill.dataset.value;
+    });
+  });
+}
+
+async function submitOrder() {
+  const errorBox = document.getElementById("formError");
+  errorBox.style.display = "none";
+
+  const problem = document.getElementById("problemInput").value.trim();
+  const address = document.getElementById("addressInput").value.trim();
+
+  if (!state.device) return showError("Qurilma turini tanlang");
+  if (!state.orderType) return showError("Xizmat turini tanlang");
+  if (!problem) return showError("Muammoni qisqacha yozing");
+
+  const submitBtn = document.getElementById("submitBtn");
+  submitBtn.disabled = true;
+  submitBtn.textContent = "Yuborilmoqda...";
+
+  try {
+    const res = await fetch(`${API_BASE_URL}/orders`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        customer_telegram_id: tg?.initDataUnsafe?.user?.id ?? 0,
+        device_type: state.device,
+        order_type: state.orderType,
+        problem_description: problem,
+        address: address || null,
+      }),
+    });
+    if (!res.ok) throw new Error("Server xatosi");
+    showScreen("screen-success");
+  } catch (e) {
+    showError("Yuborishda xatolik yuz berdi. Qaytadan urinib ko'ring.");
+  } finally {
+    submitBtn.disabled = false;
+    submitBtn.textContent = "Zayavka yuborish";
+  }
+
+  function showError(msg) {
+    errorBox.textContent = msg;
+    errorBox.style.display = "block";
+  }
+}
+
+async function loadOrders() {
+  const list = document.getElementById("ordersList");
+  const telegramId = tg?.initDataUnsafe?.user?.id ?? 0;
+  try {
+    const res = await fetch(`${API_BASE_URL}/orders/${telegramId}`);
+    const orders = await res.json();
+    if (!orders.length) {
+      list.innerHTML = `<div class="empty"><div class="ic">📋</div>Hali buyurtmalar yo'q</div>`;
+      return;
+    }
+    list.innerHTML = orders.map(o => `
+      <div class="order-card">
+        <div class="row1">
+          <div>
+            <div class="otype">${o.order_type ?? ""}</div>
+            <div class="odate">${new Date(o.created_at).toLocaleDateString("uz-UZ")}</div>
+          </div>
+          <span class="badge st-${o.status}">${STATUS_LABELS[o.status] ?? o.status}</span>
+        </div>
+        ${o.final_price ? `<div class="price">${Number(o.final_price).toLocaleString("uz-UZ")} so'm</div>` : ""}
+      </div>
+    `).join("");
+  } catch (e) {
+    list.innerHTML = `<div class="empty"><div class="ic">⚠️</div>Yuklashda xatolik yuz berdi</div>`;
+  }
+}
+
+document.getElementById("submitBtn").addEventListener("click", submitOrder);
+document.getElementById("toOrdersBtn").addEventListener("click", () => {
+  showScreen("screen-orders");
+  loadOrders();
+});
+document.getElementById("toOrderBtn").addEventListener("click", () => showScreen("screen-order"));
+
+renderDeviceGrid();
+renderOrderTypeRow();
+
+// Bot "#orders" bilan yuborsa, to'g'ridan-to'g'ri buyurtmalar ekranini ochamiz
+if (window.location.hash === "#orders") {
+  showScreen("screen-orders");
+  loadOrders();
+}
+</script>
+</body>
+</html>

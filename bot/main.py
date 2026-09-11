@@ -36,7 +36,7 @@ async def cmd_start(message: types.Message):
             [
                 types.InlineKeyboardButton(
                     text="Mening buyurtmalarim",
-                    web_app=WebAppInfo(url=f"{MINIAPP_URL}/orders"),
+                    web_app=WebAppInfo(url=f"{MINIAPP_URL}#orders"),
                 )
             ],
         ]
